@@ -24,8 +24,8 @@ $go_build
 # files
 mkdir -pv package/os/usr/sbin
 cp -vf $artifact package/os/usr/sbin/udpac
-mv $artifact packages/udpac_linux_amd64
-# package
+# packages and binary
 mkdir -vp packages
+mv $artifact packages/udpac_linux_amd64
 fpm --package=packages/ -C package/os -s dir -t deb --name=udpac --version="${VERSION}" --after-install package/after-install --deb-no-default-config-files .
 fpm --package=packages/ -C package/os -s dir -t rpm --name=udpac --version="${VERSION}" --after-install package/after-install --rpm-os linux .
