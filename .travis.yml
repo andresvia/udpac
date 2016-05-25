@@ -7,13 +7,12 @@ addons:
     - ruby-dev
     - gcc
     - make
-    - metainit
 before_install:
 - gem install fpm
 after_success:
 - mkdir -p package/deb/usr/sbin
 - cp -v udpac package/deb/usr/sbin
-- fpm -s dir -t deb -n udpac -v $TRAVIS_TAG --depends metainit --after-install package/deb-after-install --maintainer andres.via@gmail.com package/deb
+- fpm -s dir -t deb -n udpac -v $TRAVIS_TAG --after-install package/deb-after-install --maintainer andres.via@gmail.com package/deb
 deploy:
   provider: releases
   api_key:
