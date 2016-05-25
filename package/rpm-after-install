@@ -1,2 +1,5 @@
 #!/bin/bash
 set -eu
+systemctl daemon-reload
+systemctl enable udpac
+systemctl start udpac
