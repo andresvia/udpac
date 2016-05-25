@@ -12,7 +12,7 @@ before_install:
 after_success:
 - mkdir -p package/deb/usr/sbin
 - cp -v udpac package/deb/usr/sbin
-- fpm -s dir -t deb -n udpac -v $TRAVIS_TAG --after-install package/deb-after-install --maintainer andres.via@gmail.com package/deb
+- ./package/fpm.sh
 deploy:
   provider: releases
   api_key:
