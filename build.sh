@@ -17,6 +17,8 @@ VERSION="${VERSION_MAJOR_MINOR}.${VERSION_RELEASE}"
 # clean
 rm -rfv udpac udpac_linux_amd64
 rm -rfv packages/*
+# get pkgs
+go get -t -v ./...
 # build
 $go_build
 # files
