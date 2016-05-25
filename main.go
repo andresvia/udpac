@@ -1,0 +1,74 @@
+package main
+
+import (
+	"io"
+	"log"
+	"net/http"
+	"os"
+)
+
+var count = 0
+var every = 1000000
+var pac = `// ESTE ES EL ARCHIVO PAC/WPAD.DAT DE LA UNIVERSIDAD DISTRITAL
+// FRANCISCO JOSE DE CALDAS.
+
+// ESTE ARCHIVO REALIZA LA CONFIGURACION AUTOMATICA DE LA MAYORIA DE LOS
+// NAVEGADORES PARA MAS INFORMACION VISITAR http://findproxyforurl.com/
+
+// CUALQUIER PETICION DESDE EL NAVEGADOR A DOMINIOS QUE TERMINAN EN
+// .udistrital.edu.co O .udistritaloas.edu.co O .local NO SE ENVIARAN A TRAVES
+// DEL PROXY QUIERE DECIR QUE CONECTARAN DIRECTAMENTE A TRAVES DE LA RED LOCAL
+// SIEMPRE Y CUANDO LOS CLIENTES PUEDAN RESOLVER ESTOS NOMBRES CON CONFIGURACION
+// ACTUAL DE DNS Y QUE EXISTA UNA RUTA EN LA RED QUE LOS PUEDA CONECTAR ES
+// DECIR ACTUARA COMO SI EL PROXY SE HUBIERA DESHABILITADO MANUALMENTE ESTA
+// CONDICION SE BASA EN LA DIRECCION QUE SE VISITA EN LA BARRA DE DIRECCIONES
+// Y ESTA CONDICION SE EVALUA ANTES DE QUE OCURRA CUALQUIER CONEXION O
+// RESOLUCION DE NOMBRE POR PARTE DEL NAVEGADOR
+
+if ( shExpMatch(host, "*.local")                || // UN DOMINIO MUY COMUN USADO PARA DESARROLLO
+	   shExpMatch(host, "*.udistrital.edu.co")    || // DOMINIO OFICIAL DE LA UNIVERSIDAD
+     shExpMatch(host, "*.udistritaloas.edu.co") // // DOMINIO OFICIAL DE LA OFICINA ASESORA DE SISTEMAS
+	 ) return "DIRECT";
+
+// CUALQUIER PETICION QUE LUEGO DE RESOLVER EL NOMBRE DNS A UNA IP QUE SEA UNA
+// DIRECCION IP LOCAL (ES DECIR CUALQUIER IP DEL ESPACIO PRIVADO DE IPV4) NO
+// SERA ENVIADA A TRAVES DEL PROXY
+
+if ( isInNet(dnsResolve(host), "10.0.0.0", "255.0.0.0")       || // UNA RED DE CLASE A
+     isInNet(dnsResolve(host), "172.16.0.0", "255.240.0.0")   || // 16 REDES DE CLASE B
+     isInNet(dnsResolve(host), "192.168.0.0", "255.255.0.0")  || // 256 REDES DE CLASE C
+     isInNet(dnsResolve(host), "192.0.2.0"", "255.255.255.0") || // TEST-NET RFC3330
+     isInNet(dnsResolve(host), "127.0.0.0", "255.0.0.0")      // // LOOPBACK
+   ) return "DIRECT";
+
+// CUALQUIER PETICION ENVIADA A UN HOST NO CALIFICADO POR EJEMPLO http://www/ O
+// https://mail/ NO SERA ENVIADA A TRAVES DEL PROXY
+
+if ( isPlainHostName(host) ) return "DIRECT";
+
+// SI NADA COINCIDE UTILIZAR EL PROXY. LA ESTRATEGIA DE FAIL-OVER EN CASO DE
+// QUE NO SE PUEDA ESTABLECER UNA CONEXION CON EL PROXY ES HACER CONEXION
+// DIRECTA
+
+return "PROXY proxy.udistrital.edu.co:3128; DIRECT";
+
+// ESTE ES UN EJEMPLO QUE HACE FAIL-OVER CON UN PROXY DE BACKUP
+// return "PROXY proxy.udistrital.edu.co:3128; PROXY proxybkp.udistrital.edu.co:3128; DIRECT";
+// FIN`
+
+func main() {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "application/x-ns-proxy-autoconfig")
+		io.WriteString(w, pac)
+		count += 1
+		if count%every == 0 {
+			log.Println("SIRVIENDO FELIZMENTE OTRO MILLON DE PETICIONES")
+		}
+	})
+	listen := os.Getenv("UDPAC_LISTEN")
+	if listen == "" {
+		listen = ":80"
+	}
+	log.Println("INICIANDO SERVIDOR DE PAC/WPAD.DAT EN " + listen)
+	log.Fatal(http.ListenAndServe(listen, nil))
+}
