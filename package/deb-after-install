@@ -1,4 +1,0 @@
-#!/bin/bash
-set -eu
-update-rc.d udpac defaults
-service udpac start
