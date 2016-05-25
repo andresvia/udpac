@@ -1,0 +1,10 @@
+[Unit]
+Description=udpack
+After=network.target
+
+[Service]
+ExecStart=/usr/sbin/udpac
+Type=simple
+
+[Install]
+WantedBy=default.target

@@ -1,3 +1,4 @@
 #!/bin/bash
 set -eu
-update-metainit
+update-rc.d udpac defaults
+service udpac start
