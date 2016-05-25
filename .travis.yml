@@ -10,6 +10,7 @@ addons:
 before_install:
 - gem install fpm
 after_success:
+- go build
 - mkdir -p package/deb/usr/sbin
 - cp -v udpac package/deb/usr/sbin
 - "./package/fpm.sh"
