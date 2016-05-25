@@ -1,0 +1,25 @@
+language: go
+go:
+- 1.6
+addons:
+  apt:
+    packages:
+    - ruby-dev
+    - gcc
+    - make
+    - metainit
+before_install:
+- gem install fpm
+after_success:
+- mkdir -p package/deb/usr/sbin
+- cp -v udpac package/deb/usr/sbin
+- fpm -s dir -t deb -n udpac -v $TRAVIS_TAG --depends metainit --after-install package/deb-after-install --maintainer andres.via@gmail.com package/deb
+deploy:
+  provider: releases
+  api_key:
+    secure: DETA5kENCr6RlUtOBogeraXTJIV+VR6XMmGeHa/pfnx3p4hDZ/L7xAerRtzqmsvqF4eItquPQEeb23E7UMTiOedxW3krpdoM+T3UJMX/z8gfKCFaRxlmDACjrLBawCaOLq4JlaGJNQA81Rfqy5bt1h7q47zAW48FK3ddkhLxrjH8O4YGNkRxSF8hzH3sVDZDl+xWn+onBabTq8UTeb24m29HwL1Z2MOnXBQbBzLe56ZIwubtNQs3rx7zjjYKW27r7hlaY6HQJhK3L/Lvw1VdgUe1fLBdiQVzliu2Bct/R9DFwgy38G2GbJb7AK8imerFgZLZb0yUaz13Z0+i/8M/kEzRUtMN25JaRI1srTz18N54Ab4/w6tVf7PgDy6YrmH442MR61quTID9sWihufWDJL/b4Bt6IpsT9wpMr0zUbsmKPxuCHj3PFw86GZIu3PmeTTURqb1Fq5bz7J81MRjCCAkzzwt3UkTnHZHZlkcV5grblH+OiL3sKTcMhrX6qyENn1c7vU5USasdEOVgi5y8m7HfX0v81g4cjye0CPyWJpS23kbyMBPNPm+5hZPL6qApemHJx9k2uQRcV8ef0/nNQdVXUhyeVqg+INBR3gCLeWcVXSF0+bB94+UDJHgrH4HzAQtBwcMGHR8/+nuhMD25yu9SqD8tulHQDWjy1gm8cf4=
+  file_glob: true
+  file: *.deb
+  skip_cleanup: true
+  on:
+    tags: true
