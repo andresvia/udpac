@@ -27,3 +27,4 @@ udpac
 *.deb
 *.rpm
 .vagrant
+packages

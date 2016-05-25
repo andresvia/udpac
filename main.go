@@ -1,14 +1,13 @@
 package main
 
 import (
+	"github.com/prometheus/client_golang/prometheus"
 	"io"
 	"log"
 	"net/http"
 	"os"
 )
 
-var count = 0
-var every = 1000000
 var pac = `// ESTE ES EL ARCHIVO PAC/WPAD.DAT DE LA UNIVERSIDAD DISTRITAL
 // FRANCISCO JOSE DE CALDAS.
 
@@ -59,13 +58,10 @@ function FindProxyForURL(url, host) {
 // FIN`
 
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	http.Handle("/metrics", prometheus.Handler())
+	http.HandleFunc("/wpad.dat", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/x-ns-proxy-autoconfig")
 		io.WriteString(w, pac)
-		count += 1
-		if count%every == 0 {
-			log.Println("SIRVIENDO FELIZMENTE OTRO MILLON DE PETICIONES")
-		}
 	})
 	listen := os.Getenv("UDPAC_LISTEN")
 	if listen == "" {
