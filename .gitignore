@@ -25,3 +25,5 @@ _testmain.go
 
 udpac
 *.deb
+*.rpm
+.vagrant
