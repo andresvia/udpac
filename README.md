@@ -2,6 +2,15 @@
 
 ## Pruebas
 
+### En desarrollo
+
+```
+go get github.com/udistrital/udpac
+UDPAC_LISTEN=:9645 $GOPATH/bin/udpac
+```
+
+### Pruebas de CI
+
 Ejecute
 
  - `make`
@@ -16,6 +25,8 @@ Debian:
 CentOS:
 
  - `curl -v http://127.0.0.1:9646/`
+
+## Configuración de navegador
 
 Utilice estas instrucciones para configurar el proxy automáticamente en su navegador.
 
