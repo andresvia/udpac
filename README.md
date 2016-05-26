@@ -1,5 +1,7 @@
 # UD PAC y WPAD.DAT
 
+**Los paquetes .deb y .rpm se encuentran en https://github.com/udistrital/udpac/releases/latest.**
+
 ## Pruebas
 
 ### En desarrollo
