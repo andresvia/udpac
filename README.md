@@ -25,8 +25,8 @@ Los paquetes .deb y .rpm se encuentran en https://github.com/udistrital/udpac/re
 
 Instalar el paquete correspondiente en los servidores:
 
-  - http://wpad.udistrital.edu.co:80/wpad.dat
-  - http://wpad.udistritaloas.edu.co:80/wpad.dat
+  - http://wpad.udistrital.edu.co:80/
+  - http://wpad.udistritaloas.edu.co:80/
 
 Los cuales podrían ser el mismo mismo servidor con dos registros de DNS tipo `A`.
 

@@ -59,7 +59,7 @@ function FindProxyForURL(url, host) {
 
 func main() {
 	http.Handle("/metrics", prometheus.Handler())
-	http.HandleFunc("/wpad.dat", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/x-ns-proxy-autoconfig")
 		io.WriteString(w, pac)
 	})
