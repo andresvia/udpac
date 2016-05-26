@@ -51,7 +51,7 @@ Instalar el paquete correspondiente (`.deb`, .`rpm` o binario `udpac_linux_amd64
   - wpad.udistritaloas.edu.co
    - La URL de PAC será: http://wpad.udistritaloas.edu.co:80/
 
-Los cuales de hecho podrían ser el mismo mismo servidor con dos registros de DNS tipo `A`.
+Los cuales de hecho podrían ser el mismo mismo servidor con dos registros de DNS tipo `A`. Es conveniente utilizar la misma técnica de "split-brain DNS" que tiene el proxy (proxy.udistrital.edu.co) actualmente.
 
 Este servidor responde con el archivo PAC en cualquier ruta por lo tanto:
 
