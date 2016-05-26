@@ -38,9 +38,11 @@ Utilice estas instrucciones para configurar el proxy automáticamente en su nave
 
 Los paquetes .deb y .rpm se encuentran en https://github.com/udistrital/udpac/releases/latest.
 
-![WPAD por DNS](http://findproxyforurl.com/wp-content/uploads/wpaddns_diagram2.png)
+WPAD funciona automáticamente por DNS.
 
 <sub>WPAD por DNS - &copy; http://findproxyforurl.com/</sub>
+
+![WPAD por DNS](http://findproxyforurl.com/wp-content/uploads/wpaddns_diagram2.png)
 
 Instalar el paquete correspondiente (`.deb`, .`rpm` o binario `udpac_linux_amd64`) en los servidores:
 
@@ -62,11 +64,11 @@ Todas las rutas responden con el archivo PAC, con la excepción de la ruta espec
 Para algunos navegadores esto es suficiente sin embargo para ampliar la cobertura puede establecer la URL de autoconfiguración a través de:
 
  - Políticas de grupo (equipos en directorio activo)
- - O configuración por DHCP
-
-![WPAD por DHCP](http://findproxyforurl.com/wp-content/uploads/wpad_diagram1.png)
+ - O configuración por DHCP (equipos conectados a la red, que configuran su IP automáticamente)
 
 <sub>WPAD por DHCP - &copy; http://findproxyforurl.com/</sub>
+
+![WPAD por DHCP](http://findproxyforurl.com/wp-content/uploads/wpad_diagram1.png)
 
 ## Más información
 
