@@ -1,5 +1,5 @@
 [Unit]
-Description=udpack
+Description=udpac
 After=network.target
 
 [Service]
