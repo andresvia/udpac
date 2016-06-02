@@ -28,6 +28,8 @@ function FindProxyForURL(url, host) {
 
   if ( shExpMatch(host, "*.local")                || // UN DOMINIO MUY COMUN USADO PARA DESARROLLO
        shExpMatch(host, "*.localdomain")          || // UN DOMINIO COMUN USADO POR DEFECTO
+       shExpMatch(host, "*.nip.io")               || // NIP ES UN CLON DE XIP
+       shExpMatch(host, "*.xip.io")               || // XIP UN SERVICIO QUE MAPEA DOMINIOS COMODIN
        shExpMatch(host, "*.udistrital.edu.co")    || // DOMINIO OFICIAL DE LA UNIVERSIDAD
        shExpMatch(host, "*.udistritaloas.edu.co") // // DOMINIO OFICIAL DE LA OFICINA ASESORA DE SISTEMAS
      ) return "DIRECT";
