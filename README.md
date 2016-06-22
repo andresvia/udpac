@@ -7,7 +7,7 @@
 ### En desarrollo
 
 ```
-go get github.com/udistrital/udpac
+go get github.com/andresvia/udpac
 UDPAC_LISTEN=:9645 $GOPATH/bin/udpac
 ```
 
@@ -36,7 +36,7 @@ Utilice estas instrucciones para configurar el proxy automáticamente en su nave
 
 ## Paso a producción
 
-Los paquetes .deb y .rpm se encuentran en https://github.com/udistrital/udpac/releases/latest.
+Los paquetes .deb y .rpm se encuentran en https://github.com/andresvia/udpac/releases/latest.
 
 WPAD funciona automáticamente por DNS.
 
