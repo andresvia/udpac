@@ -10,6 +10,7 @@ addons:
     - rpm
 before_install:
 - gem install fpm
+- go get github.com/mitchellh/gox
 deploy:
   provider: releases
   api_key:
