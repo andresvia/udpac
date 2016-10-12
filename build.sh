@@ -1,6 +1,5 @@
 #!/bin/bash
 set -eu
-# use gox
 # vars
 CURRENT_TAG=$(git tag | tail -n1)
 VERSION_MAJOR_MINOR="${TRAVIS_TAG:-$CURRENT_TAG}"
