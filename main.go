@@ -31,7 +31,8 @@ function FindProxyForURL(url, host) {
        shExpMatch(host, "*.nip.io")               || // NIP ES UN CLON DE XIP
        shExpMatch(host, "*.xip.io")               || // XIP UN SERVICIO QUE MAPEA DOMINIOS COMODIN
        shExpMatch(host, "*.udistrital.edu.co")    || // DOMINIO OFICIAL DE LA UNIVERSIDAD
-       shExpMatch(host, "*.udistritaloas.edu.co") // // DOMINIO OFICIAL DE LA OFICINA ASESORA DE SISTEMAS
+       shExpMatch(host, "*.udistritaloas.edu.co") || // DOMINIO OFICIAL DE LA OFICINA ASESORA DE SISTEMAS
+       shExpMatch(host, "*.shd.gov.co")           // // DOMINIO DE LA SECRETARIA DE HACIENDA DISTRITAL
      ) return "DIRECT";
 
 // CUALQUIER PETICION QUE RESUELVA EL NOMBRE DNS A UNA IP LOCAL (ES DECIR
@@ -55,7 +56,7 @@ function FindProxyForURL(url, host) {
 // LA ESTRATEGIA DE FAIL-OVER EN CASO DE QUE NO SE PUEDA ESTABLECER UNA
 // CONEXION CON EL PROXY ES HACER CONEXION DIRECTA
 
-  return "PROXY proxy.udistrital.edu.co:3128; DIRECT";
+  return "PROXY 10.20.4.15:3128; DIRECT";
 
 // ESTE ES UN EJEMPLO QUE HACE FAIL-OVER CON UN PROXY DE BACKUP
 // return "PROXY proxy.udistrital.edu.co:3128; PROXY proxybkp.udistrital.edu.co:3128; DIRECT";
@@ -63,10 +64,18 @@ function FindProxyForURL(url, host) {
 // FIN`
 
 func main() {
+	pacServeCounter := prometheus.NewCounter(prometheus.CounterOpts{
+		Help: "Número de veces que se ha servido el archivo PAC",
+		Name: "pac_serve",
+	})
+	if err := prometheus.Register(pacServeCounter); err != nil {
+		print(err.Error())
+	}
 	http.Handle("/metrics", prometheus.Handler())
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/x-ns-proxy-autoconfig")
 		io.WriteString(w, pac)
+		pacServeCounter.Inc()
 	})
 	listen := os.Getenv("UDPAC_LISTEN")
 	if listen == "" {
