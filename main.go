@@ -1,9 +1,13 @@
 package main
 
 import (
+	"crypto/tls"
+	log "github.com/Sirupsen/logrus"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/sohlich/elogrus"
+	"gopkg.in/olivere/elastic.v3"
+	"gopkg.in/urfave/cli.v1"
 	"io"
-	"log"
 	"net/http"
 	"os"
 )
@@ -79,24 +83,67 @@ function FindProxyForURL(url, host) {
 // FIN`
 
 func main() {
+	app := cli.NewApp()
+	app.Action = action
+	app.Flags = []cli.Flag{
+		cli.StringFlag{Name: "listen,l", Value: ":80", EnvVar: "UDPAC_LISTEN"},
+		cli.StringFlag{Name: "es-server", Value: "https://zabbix.udistritaloas.edu.co:9443/"},
+		cli.StringFlag{Name: "es-user", Value: "udnet"},
+		cli.StringFlag{Name: "es-pass"},
+		cli.BoolFlag{Name: "es-secure"},
+		cli.StringFlag{Name: "es-hostname", Value: "udpac"},
+		cli.StringFlag{Name: "es-index", Value: "udnet"},
+		cli.Uint64Flag{Name: "racy-counter-mod", Value: 1000000},
+	}
+	app.Run(os.Args)
+}
+
+func action(ctx *cli.Context) {
+	var err error
+	var racyCounter uint64
+
+	logctx := log.WithFields(log.Fields{})
+	logctx.Info("INICIANDO UDPAC")
+
+	logctx.Info("CONFIGURANDO ELASTICSEARCH")
+	client := &elastic.Client{}
+	hook := &elogrus.ElasticHook{}
+	if client, err = elastic.NewClient(
+		elastic.SetURL(ctx.String("es-server")),
+		elastic.SetBasicAuth(ctx.String("es-user"), ctx.String("es-pass")),
+		elastic.SetSniff(false),
+		elastic.SetMaxRetries(10),
+		elastic.SetHttpClient(&http.Client{Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: !ctx.Bool("es-secure")}}})); err != nil {
+		logctx.Error("ERROR OBTENIENDO CLIENTE ES: " + err.Error())
+	} else if hook, err = elogrus.NewElasticHook(client, ctx.String("es-hostname"), log.DebugLevel, ctx.String("es-index")); err != nil {
+		logctx.Error("ERROR EN HOOK:" + err.Error())
+	} else {
+		log.AddHook(hook)
+	}
+
+	logctx.Info("CONFIGURANDO PROMETHEUS")
 	pacServeCounter := prometheus.NewCounter(prometheus.CounterOpts{
 		Help: "Número de veces que se ha servido el archivo PAC",
 		Name: "pac_serve",
 	})
-	if err := prometheus.Register(pacServeCounter); err != nil {
-		print(err.Error())
+	if err = prometheus.Register(pacServeCounter); err != nil {
+		logctx.Error("ERROR CONFIGURANDO PROMETHEUS: " + err.Error())
 	}
+
+	logctx.Info("CONFIGURANDO SERVIDOR HTTP")
 	http.Handle("/metrics", prometheus.Handler())
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/x-ns-proxy-autoconfig")
 		io.WriteString(w, pac)
 		pacServeCounter.Inc()
+		// esto es una mala idea
+		racyCounter = racyCounter + 1
+		if racyCounter%ctx.Uint64("racy-counter-mod") == 0 {
+			log.WithField("count", racyCounter).Info("Another million happy customers")
+		}
 	})
-	listen := os.Getenv("UDPAC_LISTEN")
-	if listen == "" {
-		listen = ":80"
-	}
-	log.Println("INICIANDO SERVIDOR DE PAC/WPAD.DAT EN " + listen)
-	log.Println("UTILIZAR VARIABLE DE ENTORNO UDPAC_LISTEN PARA CAMBIAR EL PUERTO")
-	log.Fatal(http.ListenAndServe(listen, nil))
+
+	listen := ctx.String("listen")
+	logctx.Info("INICIANDO SERVIDOR DE PAC/WPAD.DAT EN " + listen)
+	logctx.Fatal(http.ListenAndServe(listen, nil))
 }
