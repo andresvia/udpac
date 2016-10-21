@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sohlich/elogrus"
@@ -10,6 +11,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"time"
 )
 
 var pac = `// ESTE ES EL ARCHIVO PAC/WPAD.DAT DE LA UNIVERSIDAD DISTRITAL
@@ -89,11 +91,13 @@ func main() {
 		cli.StringFlag{Name: "listen,l", Value: ":80", EnvVar: "UDPAC_LISTEN"},
 		cli.StringFlag{Name: "es-server", Value: "https://zabbix.udistritaloas.edu.co:9443/"},
 		cli.StringFlag{Name: "es-user", Value: "udnet"},
-		cli.StringFlag{Name: "es-pass"},
+		cli.StringFlag{Name: "es-pass", EnvVar: "UDPAC_ES_PASS"},
 		cli.BoolFlag{Name: "es-secure"},
 		cli.StringFlag{Name: "es-hostname", Value: "udpac"},
-		cli.StringFlag{Name: "es-index", Value: "udnet"},
+		cli.StringFlag{Name: "es-index-prefix", Value: "udnet-"},
 		cli.Uint64Flag{Name: "racy-counter-mod", Value: 1000000},
+		cli.DurationFlag{Name: "es-index-duration", Value: 23*time.Hour + 59*time.Minute},
+		cli.StringFlag{Name: "es-index-layout", Value: "2006.01.02"},
 	}
 	app.Run(os.Args)
 }
@@ -105,21 +109,37 @@ func action(ctx *cli.Context) {
 	logctx := log.WithFields(log.Fields{})
 	logctx.Info("INICIANDO UDPAC")
 
-	logctx.Info("CONFIGURANDO ELASTICSEARCH")
-	client := &elastic.Client{}
-	hook := &elogrus.ElasticHook{}
-	if client, err = elastic.NewClient(
-		elastic.SetURL(ctx.String("es-server")),
-		elastic.SetBasicAuth(ctx.String("es-user"), ctx.String("es-pass")),
-		elastic.SetSniff(false),
-		elastic.SetMaxRetries(10),
-		elastic.SetHttpClient(&http.Client{Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: !ctx.Bool("es-secure")}}})); err != nil {
-		logctx.Error("ERROR OBTENIENDO CLIENTE ES: " + err.Error())
-	} else if hook, err = elogrus.NewElasticHook(client, ctx.String("es-hostname"), log.DebugLevel, ctx.String("es-index")); err != nil {
-		logctx.Error("ERROR EN HOOK:" + err.Error())
-	} else {
-		log.AddHook(hook)
+	ticker := time.NewTicker(ctx.Duration("es-index-duration"))
+
+	config_es := func() {
+		logctx.Info("CONFIGURANDO ELASTICSEARCH")
+		client := &elastic.Client{}
+		hook := &elogrus.ElasticHook{}
+		es_index := ctx.String("es-index-prefix") + time.Now().Format(ctx.String("es-index-layout"))
+		if client, err = elastic.NewClient(
+			elastic.SetURL(ctx.String("es-server")),
+			elastic.SetBasicAuth(ctx.String("es-user"), ctx.String("es-pass")),
+			elastic.SetSniff(false),
+			elastic.SetMaxRetries(10),
+			elastic.SetHttpClient(&http.Client{Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: !ctx.Bool("es-secure")}}})); err != nil {
+			logctx.Error("ERROR OBTENIENDO CLIENTE ES: " + err.Error())
+		} else if hook, err = elogrus.NewElasticHook(client, ctx.String("es-hostname"), log.DebugLevel, es_index); err != nil {
+			logctx.Error("ERROR EN HOOK:" + err.Error())
+		} else {
+			log.StandardLogger().Hooks = make(log.LevelHooks)
+			log.AddHook(hook)
+		}
 	}
+
+	config_es()
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				config_es()
+			}
+		}
+	}()
 
 	logctx.Info("CONFIGURANDO PROMETHEUS")
 	pacServeCounter := prometheus.NewCounter(prometheus.CounterOpts{
@@ -139,7 +159,7 @@ func action(ctx *cli.Context) {
 		// esto es una mala idea
 		racyCounter = racyCounter + 1
 		if racyCounter%ctx.Uint64("racy-counter-mod") == 0 {
-			log.WithField("count", racyCounter).Info("Another million happy customers")
+			log.WithField("count", racyCounter).Info(fmt.Sprintf("Another %d happy customers", ctx.Uint64("racy-counter-mod")))
 		}
 	})
 
