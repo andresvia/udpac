@@ -44,13 +44,13 @@ function FindProxyForURL(url, host) {
   // RESOLUCION DE NOMBRE POR PARTE DEL NAVEGADOR
   // LAS EXCEPCIONES A ESTA REGLA GENERAL DEBERÁN INSERTARSE ANTES DE ESTO
 
-  if (shExpMatch(host, "*.local") || // UN DOMINIO MUY COMUN USADO PARA DESARROLLO
+  if (shExpMatch(host, "127.0.0.1") || // LOOPBACK
+    shExpMatch(host, "*.local") || // UN DOMINIO MUY COMUN USADO PARA DESARROLLO
     shExpMatch(host, "*.localdomain") || // UN DOMINIO COMUN USADO POR DEFECTO
     shExpMatch(host, "*.nip.io") || // NIP ES UN CLON DE XIP
     shExpMatch(host, "*.xip.io") || // XIP UN SERVICIO QUE MAPEA DOMINIOS COMODIN
     shExpMatch(host, "*.udistrital.edu.co") || // DOMINIO OFICIAL DE LA UNIVERSIDAD
-    shExpMatch(host, "*.udistritaloas.edu.co") || // DOMINIO NO OFICIAL DE LA OFICINA ASESORA DE SISTEMAS
-    shExpMatch(host, "*.shd.gov.co") // DOMINIO DE LA SECRETARIA DE HACIENDA DISTRITAL
+    shExpMatch(host, "*.udistritaloas.edu.co") // DOMINIO NO OFICIAL DE LA OFICINA ASESORA DE SISTEMAS
   ) {
     return "DIRECT";
   }
