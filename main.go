@@ -32,7 +32,13 @@ function FindProxyForURL(url, host) {
   if (shExpMatch(host, "*.portaloas.udistrital.edu.co")) {
     return defaultProxy;
   }
-
+  
+  // EXCEPCION AULAS VIRTUALES
+  // AULAS VIRTUALES SE ENCUENTRA ALOJADO POR FUERA DE LA RED LOCAL, DEBE UTILIZAR PROXY
+  if (dnsDomainIs(host, "aulasvirtuales.udistrital.edu.co")) {
+    return defaultProxy;
+  }
+  
   // CUALQUIER PETICION DESDE EL NAVEGADOR A DOMINIOS QUE TERMINEN EN
   // .udistrital.edu.co O .udistritaloas.edu.co O .local[domain] NO SE ENVIARA A
   // TRAVES DEL PROXY, QUIERE DECIR QUE CONECTARAN DIRECTAMENTE A TRAVES DE LA
