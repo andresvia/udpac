@@ -1,24 +1,20 @@
-#!/bin/bash
-set -eu
-# vars
-CURRENT_TAG=$(git tag | tail -n1)
-VERSION_MAJOR_MINOR="${TRAVIS_TAG:-$CURRENT_TAG}"
-VERSION_RELEASE="${TRAVIS_BUILD_NUMBER:-$(date +%s)}"
-VERSION="${VERSION_MAJOR_MINOR}.${VERSION_RELEASE}"
+#!/usr/bin/env bash
+set -e -u -x
 # clean
-rm -rfv udpac udpac_linux_amd64
-rm -rfv packages/*
+artifacts="udpac_linux_386 udpac_linux_amd64 udpac_windows_386.exe udpac_windows_amd64.exe"
+# shellcheck disable=SC2086
+rm -rfv udpac $artifacts package/os/usr/sbin/udpac
+rm -rfv packages
 # get pkgs
 go get -t -v ./...
 # build
 gox -os 'Linux Windows' -arch 'amd64 386'
-package_artifact="udpac_linux_amd64"
-artifacts="udpac_linux_386 udpac_linux_amd64 udpac_windows_386.exe udpac_windows_amd64.exe"
 # files
 mkdir -pv package/os/usr/sbin
-cp -vf $package_artifact package/os/usr/sbin/udpac
+cp -vf udpac_linux_amd64 package/os/usr/sbin/udpac
 # packages and binary
 mkdir -vp packages
+# shellcheck disable=SC2086
 mv $artifacts packages/
-fpm --package=packages/ -C package/os -s dir -t deb --name=udpac --version="${VERSION}" --after-install package/after-install --deb-no-default-config-files .
-fpm --package=packages/ -C package/os -s dir -t rpm --name=udpac --version="${VERSION}" --after-install package/after-install --rpm-os linux .
+fpm --debug --package=packages/ -C package/os -s dir -t deb --name=udpac --version="${TRAVIS_TAG:-SNAPSHOT}" --after-install package/after-install --deb-no-default-config-files .
+fpm --debug --package=packages/ -C package/os -s dir -t rpm --name=udpac --version="${TRAVIS_TAG:-SNAPSHOT}" --after-install package/after-install --rpm-os linux .
