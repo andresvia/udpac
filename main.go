@@ -5,7 +5,7 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/sohlich/elogrus"
+	"gopkg.in/sohlich/elogrus.v2"
 	"gopkg.in/olivere/elastic.v5"
 	"gopkg.in/urfave/cli.v1"
 	"io"
