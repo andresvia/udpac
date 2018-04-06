@@ -51,6 +51,7 @@ function FindProxyForURL(url, host) {
   // LAS EXCEPCIONES A ESTA REGLA GENERAL DEBERÁN INSERTARSE ANTES DE ESTO
 
   if (shExpMatch(host, "127.0.0.1") || // LOOPBACK
+    shExpMatch(host, "udistrital.infointelligen.com") || // PETICION UDNET 2018-04-06
     shExpMatch(host, "*.local") || // UN DOMINIO MUY COMUN USADO PARA DESARROLLO
     shExpMatch(host, "*.localdomain") || // UN DOMINIO COMUN USADO POR DEFECTO
     shExpMatch(host, "*.nip.io") || // NIP ES UN CLON DE XIP
